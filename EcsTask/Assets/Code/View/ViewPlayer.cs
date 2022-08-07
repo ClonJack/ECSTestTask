@@ -23,32 +23,23 @@ namespace Code.View
 
             _entity = _world.NewEntity();
 
-
-            var markerPool = _world.GetPool<MarkerComponent>();
-            markerPool.Add(_entity);
-            markerPool.Get(_entity).Position = transform.position;
-
+            
             var targetPool = _world.GetPool<TargetComponent>();
             targetPool.Add(_entity);
             targetPool.Get(_entity).Position = transform.position;
 
-            var cameraPool = _world.GetPool<CameraComponent>();
+            var cameraPool = _world.GetPool<CameraFollowerComponent>();
             cameraPool.Add(_entity);
             cameraPool.Get(_entity).Duration = _durationCamera;
-        }
 
+            var playerPool = _world.GetPool<TransformComponent>();
+            playerPool.Add(_entity);
+            playerPool.Get(_entity).Transform = transform;
 
-        private void Update()
-        {
-            if (_world.GetPool<MarkerComponent>().Has(_entity))
-            {
-                _world.GetPool<MarkerComponent>().Get(_entity).Position = transform.position;
-            }
+            var durationPool = _world.GetPool<DurationComponent>();
+            durationPool.Add(_entity);
+            durationPool.Get(_entity).Duration = _durationMove;
 
-            Vector3 pointToMove = _world.GetPool<TargetComponent>().Get(_entity).Position;
-            
-            transform.position = Vector3.MoveTowards(transform.position, pointToMove,
-                _durationMove * Time.deltaTime);
         }
     }
 }

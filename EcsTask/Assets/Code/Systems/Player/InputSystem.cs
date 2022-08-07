@@ -1,15 +1,13 @@
 ﻿using Code.Components;
 using Leopotam.EcsLite;
 using UnityEngine;
-using Zenject;
 
 namespace Code.Systems.Player
 {
-    public class InputSystem : IEcsInitSystem, IEcsRunSystem,IInitializable
+    public class InputSystem : IEcsInitSystem, IEcsRunSystem
     {
         private EcsWorld _world;
 
-        
         public void Init(IEcsSystems systems)
         {
             _world = systems.GetWorld();
@@ -17,25 +15,28 @@ namespace Code.Systems.Player
 
         public void Run(IEcsSystems systems)
         {
-            var filter = _world.Filter<MarkerComponent>().Inc<TargetComponent>().Inc<CameraComponent>().End();
+            var filter = _world.Filter<TargetComponent>().Inc<CameraFollowerComponent>()
+                .Inc<TransformComponent>().Inc<DurationComponent>().End();
 
-
-            var markerPool = _world.GetPool<MarkerComponent>();
-            var targetPool = _world.GetPool<TargetComponent>();
-            var cameraPool = _world.GetPool<CameraComponent>();
             
+            var targetPool = _world.GetPool<TargetComponent>();
+            var cameraPool = _world.GetPool<CameraFollowerComponent>();
+            var playerPool = _world.GetPool<TransformComponent>();
+            var durationPool = _world.GetPool<DurationComponent>();
+
 
             foreach (var entity in filter)
             {
-                ref MarkerComponent marker = ref markerPool.Get(entity);
                 ref TargetComponent target = ref targetPool.Get(entity);
-                ref CameraComponent camera = ref cameraPool.Get(entity);
-                
+                ref CameraFollowerComponent cameraFollower = ref cameraPool.Get(entity);
+                ref TransformComponent player = ref playerPool.Get(entity);
+                ref DurationComponent duration = ref durationPool.Get(entity);
+
+
                 if (Input.GetMouseButton(0))
                 {
-                    Vector3 point = GetPointClick(marker.Position);
-                    target.Position = new Vector3(point.x, marker.Position.y, point.z);
-
+                    Vector3 point = GetPointClick(player.Transform.position);
+                    target.Position = new Vector3(point.x, player.Transform.position.y, point.z);
                 }
             }
         }
@@ -51,11 +52,6 @@ namespace Code.Systems.Player
             }
 
             return Vector3.zero;
-        }
-
-        public void Initialize()
-        {
-            
         }
     }
 }

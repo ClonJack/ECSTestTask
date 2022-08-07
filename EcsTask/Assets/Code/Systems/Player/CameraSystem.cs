@@ -1,7 +1,6 @@
 ﻿using Code.Components;
 using Leopotam.EcsLite;
 using UnityEngine;
-using UnityEngine.Timeline;
 
 namespace Code.Systems.Player
 {
@@ -20,24 +19,27 @@ namespace Code.Systems.Player
 
         public void Run(IEcsSystems systems)
         {
-            var filter = _world.Filter<MarkerComponent>().Inc<TargetComponent>().Inc<CameraComponent>().End();
+            var filter = _world.Filter<TargetComponent>().Inc<CameraFollowerComponent>()
+                .Inc<TransformComponent>().Inc<DurationComponent>().End();
 
-
-            var markerPool = _world.GetPool<MarkerComponent>();
+            
             var targetPool = _world.GetPool<TargetComponent>();
-            var cameraPool = _world.GetPool<CameraComponent>();
-
+            var cameraPool = _world.GetPool<CameraFollowerComponent>();
+            var playerPool = _world.GetPool<TransformComponent>();
+            var durationPool = _world.GetPool<DurationComponent>();
+            
 
             foreach (var entity in filter)
             {
-                ref MarkerComponent marker = ref markerPool.Get(entity);
                 ref TargetComponent target = ref targetPool.Get(entity);
-                ref CameraComponent camera = ref cameraPool.Get(entity);
-
-                Vector3 targetPosition = marker.Position + camera.Offset;
+                ref CameraFollowerComponent cameraFollower = ref cameraPool.Get(entity);
+                ref TransformComponent player = ref playerPool.Get(entity);
+                ref DurationComponent duration = ref durationPool.Get(entity);
+                
+                Vector3 targetPosition = player.Transform.position + cameraFollower.Offset;
 
                 _camera.position =
-                    Vector3.SmoothDamp(_camera.position, targetPosition, ref camera.Velocity, camera.Duration);
+                    Vector3.SmoothDamp(_camera.position, targetPosition, ref cameraFollower.Velocity, cameraFollower.Duration);
             }
         }
     }

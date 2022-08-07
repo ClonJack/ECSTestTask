@@ -6,12 +6,10 @@ using UnityEngine;
 
 namespace Code
 {
-    
     sealed class EcsStartup : MonoBehaviour, IEcsWorld
     {
         private EcsWorld _world;
 
-        private IEcsSystems _initSystems;
         private IEcsSystems _updateSystems;
         private IEcsSystems _lateUpdateSystems;
 
@@ -19,14 +17,10 @@ namespace Code
         {
             _world = new EcsWorld();
 
-            _initSystems = new EcsSystems(_world);
-            _initSystems
-                .Add(new ButtonInitSystem());
-
             _updateSystems = new EcsSystems(_world);
             _updateSystems
                 .Add(new InputSystem())
-                .Add(new MovementSystem())
+                .Add(new MoveSystem())
                 .Add(new ButtonSystem());
 
             _lateUpdateSystems = new EcsSystems(_world);
@@ -34,14 +28,13 @@ namespace Code
 
 #if UNITY_EDITOR
 
-            _initSystems.Add(new Leopotam.EcsLite.UnityEditor.EcsWorldDebugSystem());
+
             _updateSystems.Add(new Leopotam.EcsLite.UnityEditor.EcsWorldDebugSystem());
             _lateUpdateSystems.Add(new Leopotam.EcsLite.UnityEditor.EcsWorldDebugSystem());
 
 #endif
 
 
-            _initSystems.Init();
             _updateSystems.Init();
             _lateUpdateSystems.Init();
         }
@@ -59,15 +52,8 @@ namespace Code
 
         private void OnDestroy()
         {
-            if (_initSystems != null)
-            {
-                // list of custom worlds will be cleared
-                // during IEcsSystems.Destroy(). so, you
-                // need to save it here if you need.
-                _initSystems.Destroy();
-                _initSystems = null;
-            }
-
+            _updateSystems.Destroy();
+            _lateUpdateSystems.Destroy();
             // cleanup custom worlds here.
 
             // cleanup default world.

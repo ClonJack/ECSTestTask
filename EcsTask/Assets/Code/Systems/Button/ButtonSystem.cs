@@ -1,5 +1,4 @@
 ﻿using Code.Components;
-using Code.View;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -16,49 +15,49 @@ namespace Code.Systems.Button
 
         public void Run(IEcsSystems systems)
         {
-            var buttonFilter = _world.Filter<IDComponent>()
-                .Inc<ButtonComponent>()
+            var playerFilter = _world.Filter<TargetComponent>().Inc<CameraFollowerComponent>()
+                .Inc<TransformComponent>().Inc<DurationComponent>().End();
+
+            var targetPoolPlayer = _world.GetPool<TargetComponent>();
+            var cameraPoolPlayer = _world.GetPool<CameraFollowerComponent>();
+            var playerPoolPlayer = _world.GetPool<TransformComponent>();
+            var durationPoolPlayer = _world.GetPool<DurationComponent>();
+
+
+            var buttonFilter = _world.Filter<InteractComponent>().Inc<TransformComponent>().Inc<DistanceComponent>()
+                .Inc<VectorComponent>().Inc<DurationComponent>()
                 .End();
 
-            var playerFilter = _world.Filter<PlayerComponent>().End();
+            var targetPoolDoor = _world.GetPool<InteractComponent>();
+            var targetPoolButton = _world.GetPool<TransformComponent>();
+            var distancePool = _world.GetPool<DistanceComponent>();
+            var vectorPool = _world.GetPool<VectorComponent>();
+            var durationMoveDoorPool = _world.GetPool<DurationComponent>();
 
-            var buttonPool = _world.GetPool<ButtonComponent>();
-            var playerPool = _world.GetPool<PlayerComponent>();
 
-            foreach (int entityButton in buttonFilter)
+            foreach (var entityPlayer in playerFilter)
             {
-                ref ButtonComponent button = ref buttonPool.Get(entityButton);
+                ref TargetComponent target = ref targetPoolPlayer.Get(entityPlayer);
+                ref CameraFollowerComponent cameraFollower = ref cameraPoolPlayer.Get(entityPlayer);
+                ref TransformComponent player = ref playerPoolPlayer.Get(entityPlayer);
+                ref DurationComponent durationPlayer = ref durationPoolPlayer.Get(entityPlayer);
 
-                foreach (var entityPlayer in playerFilter)
+                foreach (var entityButton in buttonFilter)
                 {
-                    ref PlayerComponent player = ref playerPool.Get(entityPlayer);
+                    ref InteractComponent door = ref targetPoolDoor.Get(entityButton);
+                    ref TransformComponent button = ref targetPoolButton.Get(entityButton);
+                    ref DistanceComponent distance = ref distancePool.Get(entityButton);
+                    ref VectorComponent moveVector = ref vectorPool.Get(entityButton);
+                    ref DurationComponent durationMoveDoor = ref durationMoveDoorPool.Get(entityButton);
 
-                    var distance = (player.Unit.position - button.Button.position).sqrMagnitude;
+                    var currentDistance = (player.Transform.position - button.Transform.position).sqrMagnitude;
 
-                    if (distance < 2f)
+                    if (currentDistance < distance.Distance)
                     {
-                        if (!_world.GetPool<DoorComponent>().Has(entityButton))
-                        {
-                            _world.GetPool<DoorComponent>().Add(entityButton);
-                            
-                            _world.GetPool<DoorComponent>().Get(entityButton).Door =
-                                button.Button.GetComponent<ViewButton>().Door;
-                        }
-                    }
-                    else
-                    {
-                        if (_world.GetPool<DoorComponent>().Has(entityButton))
-                        {
-                            _world.GetPool<DoorComponent>().Del(entityButton);
-                        }
-                    }
-
-                    if (_world.GetPool<DoorComponent>().Has(entityButton))
-                    {
-                        Transform doorMove = _world.GetPool<DoorComponent>().Get(entityButton).Door;
-                        doorMove.position = Vector3.MoveTowards(doorMove.position, 
-                            doorMove.position + (Vector3.up * 15),
-                            5f * Time.deltaTime);
+                        Transform doorMove = door.Interact;
+                        doorMove.position = Vector3.MoveTowards(doorMove.position,
+                            doorMove.position + moveVector.Position,
+                            durationMoveDoor.Duration * Time.deltaTime);
                     }
                 }
             }
