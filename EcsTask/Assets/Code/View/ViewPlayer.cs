@@ -7,14 +7,19 @@ namespace Code.View
 {
     public class ViewPlayer : MonoBehaviour
     {
-        [Inject] private IEcsWorld _ecsWorld;
-
+        private IEcsWorld _ecsWorld;
         private EcsWorld _world;
-
         private int _entity;
+        
 
         [SerializeField] private float _durationCamera;
         [SerializeField] private float _durationMove;
+
+        [Inject]
+        public void Construct(IEcsWorld ecsWorld)
+        {
+            _ecsWorld = ecsWorld;
+        }
 
         private void Start()
         {
@@ -31,13 +36,13 @@ namespace Code.View
 
             var targetPool = _world.GetPool<InputComponent>();
             targetPool.Add(_entity);
-            
+
             ref InputComponent input = ref targetPool.Get(_entity);
             input.Owner = transform;
 
             var cameraFollowerPool = _world.GetPool<CameraFollowerComponent>();
             cameraFollowerPool.Add(_entity);
-            
+
             ref CameraFollowerComponent camera = ref cameraFollowerPool.Get(_entity);
             camera.Duration = _durationCamera;
             camera.Target = transform;

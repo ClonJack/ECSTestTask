@@ -7,10 +7,10 @@ namespace Code.View
 {
     public class ViewButton : MonoBehaviour
     {
-        [Inject] private IEcsWorld _ecsWorld;
+        private IEcsWorld _ecsWorld;
         private EcsWorld _world;
         private int _entity;
-        
+
         [SerializeField] private Transform _interact;
 
         [SerializeField] private Vector3 _positionMove;
@@ -18,11 +18,18 @@ namespace Code.View
         [SerializeField] private float _distance;
         [SerializeField] private float _duration;
 
+
+        [Inject]
+        public void Construct(IEcsWorld ecsWorld)
+        {
+            _ecsWorld = ecsWorld;
+        }
+
         private void Start()
         {
             _world = _ecsWorld.GetWorld();
             _entity = _world.NewEntity();
-            
+
             var buttonPool = _world.GetPool<ButtonComponent>();
             buttonPool.Add(_entity);
 
