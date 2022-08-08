@@ -15,29 +15,25 @@ namespace Code.Systems.Player
 
         public void Run(IEcsSystems systems)
         {
-            var filter = _world.Filter<TargetComponent>().Inc<CameraFollowerComponent>()
-                .Inc<TransformComponent>().Inc<DurationComponent>().End();
+            var filter = _world.Filter<InputComponent>().End();
 
-            
+            var inputPool = _world.GetPool<InputComponent>();
             var targetPool = _world.GetPool<TargetComponent>();
-            var cameraPool = _world.GetPool<CameraFollowerComponent>();
-            var playerPool = _world.GetPool<TransformComponent>();
-            var durationPool = _world.GetPool<DurationComponent>();
 
+            if (!Input.GetMouseButton(0)) return;
 
-            foreach (var entity in filter)
+            foreach (var entityInput in filter)
             {
-                ref TargetComponent target = ref targetPool.Get(entity);
-                ref CameraFollowerComponent cameraFollower = ref cameraPool.Get(entity);
-                ref TransformComponent player = ref playerPool.Get(entity);
-                ref DurationComponent duration = ref durationPool.Get(entity);
+                ref InputComponent input = ref inputPool.Get(entityInput);
 
-
-                if (Input.GetMouseButton(0))
+                if (!_world.GetPool<TargetComponent>().Has(entityInput))
                 {
-                    Vector3 point = GetPointClick(player.Transform.position);
-                    target.Position = new Vector3(point.x, player.Transform.position.y, point.z);
+                    _world.GetPool<TargetComponent>().Add(entityInput);
                 }
+                
+                ref TargetComponent target = ref targetPool.Get(entityInput);
+                
+                target.Position = GetPointClick(input.Owner.position);
             }
         }
 

@@ -1,6 +1,5 @@
-using Code.Systems.Button;
+using Code.Systems.Interact;
 using Code.Systems.Player;
-using Code.View;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -21,7 +20,8 @@ namespace Code
             _updateSystems
                 .Add(new InputSystem())
                 .Add(new MoveSystem())
-                .Add(new ButtonSystem());
+                .Add(new ButtonSystem())
+                .Add(new InteractSystem());
 
             _lateUpdateSystems = new EcsSystems(_world);
             _lateUpdateSystems.Add(new CameraSystem());

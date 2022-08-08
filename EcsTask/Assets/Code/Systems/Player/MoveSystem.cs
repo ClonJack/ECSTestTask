@@ -8,6 +8,8 @@ namespace Code.Systems.Player
     {
         private EcsWorld _world;
 
+        private const float MaxDistancePoint = 0.1f;
+
         public void Init(IEcsSystems systems)
         {
             _world = systems.GetWorld();
@@ -15,25 +17,30 @@ namespace Code.Systems.Player
 
         public void Run(IEcsSystems systems)
         {
-            var filter = _world.Filter<TargetComponent>().Inc<CameraFollowerComponent>()
-                .Inc<TransformComponent>().Inc<DurationComponent>().End();
+            var filter = _world.Filter<MoveComponent>().End();
 
-
+            var movePool = _world.GetPool<MoveComponent>();
             var targetPool = _world.GetPool<TargetComponent>();
-            var cameraPool = _world.GetPool<CameraFollowerComponent>();
-            var playerPool = _world.GetPool<TransformComponent>();
-            var durationPool = _world.GetPool<DurationComponent>();
 
-            foreach (var entity in filter)
+            foreach (var entityMove in filter)
             {
-                ref TargetComponent target = ref targetPool.Get(entity);
-                ref CameraFollowerComponent cameraFollower = ref cameraPool.Get(entity);
-                ref TransformComponent player = ref playerPool.Get(entity);
-                ref DurationComponent duration = ref durationPool.Get(entity);
+                ref MoveComponent move = ref movePool.Get(entityMove);
 
+                if (!targetPool.Has(entityMove)) continue;
 
-                player.Transform.position = Vector3.MoveTowards(player.Transform.position, target.Position,
-                    duration.Duration * Time.deltaTime);
+                ref TargetComponent target = ref targetPool.Get(entityMove);
+
+                var currentDistance = (move.TransformMoved.position - target.Position).sqrMagnitude;
+                if (currentDistance < MaxDistancePoint)
+                {
+                    targetPool.Del(entityMove);
+                }
+
+                var time = move.DurationMoved * Time.deltaTime;
+                target.Position = new Vector3(target.Position.x, move.TransformMoved.position.y, target.Position.z);
+
+                move.TransformMoved.position =
+                    Vector3.MoveTowards(move.TransformMoved.position, target.Position, time);
             }
         }
     }

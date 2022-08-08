@@ -4,6 +4,6 @@ namespace Code.Components
 {
     public struct InputComponent
     {
-        public Vector3 Position;
+        public Transform Owner;
     }
 }

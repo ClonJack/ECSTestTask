@@ -1,4 +1,3 @@
-using System;
 using Code.Components;
 using Leopotam.EcsLite;
 using UnityEngine;
@@ -23,23 +22,25 @@ namespace Code.View
 
             _entity = _world.NewEntity();
 
-            
-            var targetPool = _world.GetPool<TargetComponent>();
+            var movePool = _world.GetPool<MoveComponent>();
+            movePool.Add(_entity);
+
+            ref MoveComponent move = ref movePool.Get(_entity);
+            move.TransformMoved = transform;
+            move.DurationMoved = _durationMove;
+
+            var targetPool = _world.GetPool<InputComponent>();
             targetPool.Add(_entity);
-            targetPool.Get(_entity).Position = transform.position;
+            
+            ref InputComponent input = ref targetPool.Get(_entity);
+            input.Owner = transform;
 
-            var cameraPool = _world.GetPool<CameraFollowerComponent>();
-            cameraPool.Add(_entity);
-            cameraPool.Get(_entity).Duration = _durationCamera;
-
-            var playerPool = _world.GetPool<TransformComponent>();
-            playerPool.Add(_entity);
-            playerPool.Get(_entity).Transform = transform;
-
-            var durationPool = _world.GetPool<DurationComponent>();
-            durationPool.Add(_entity);
-            durationPool.Get(_entity).Duration = _durationMove;
-
+            var cameraFollowerPool = _world.GetPool<CameraFollowerComponent>();
+            cameraFollowerPool.Add(_entity);
+            
+            ref CameraFollowerComponent camera = ref cameraFollowerPool.Get(_entity);
+            camera.Duration = _durationCamera;
+            camera.Target = transform;
         }
     }
 }

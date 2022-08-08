@@ -220,9 +220,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interact: {fileID: 1995480744}
+  _positionMove: {x: 0, y: 15, z: 0}
   _distance: 2.5
   _duration: 5
-  _positionMove: {x: 0, y: 15, z: 0}
 --- !u!1 &115324800
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,9 +670,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interact: {fileID: 115324801}
+  _positionMove: {x: 0, y: 15, z: 0}
   _distance: 2.5
   _duration: 5
-  _positionMove: {x: 0, y: 15, z: 0}
 --- !u!1 &1409575205
 GameObject:
   m_ObjectHideFlags: 0
