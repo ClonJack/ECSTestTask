@@ -26,13 +26,13 @@ namespace Code.Systems.Player
             {
                 ref InputComponent input = ref inputPool.Get(entityInput);
 
-                if (!_world.GetPool<TargetComponent>().Has(entityInput))
+                if (!targetPool.Has(entityInput))
                 {
-                    _world.GetPool<TargetComponent>().Add(entityInput);
+                    targetPool.Add(entityInput);
                 }
-                
+
                 ref TargetComponent target = ref targetPool.Get(entityInput);
-                
+
                 target.Position = GetPointClick(input.Owner.position);
             }
         }
